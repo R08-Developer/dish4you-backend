@@ -18,6 +18,29 @@ def root():
 def import_recipe(data: ImportRequest):
     response = client.responses.create(
         model="gpt-4.1-mini",
-        input=f"Zet deze recepttekst om naar nette, korte JSON met titel, ingredienten en stappen:\n\n{data.text}"
+        input=f"Zet deze recepttekst om naar een gestructureerd recept.\n\n{data.text}",
+        text={
+            "format": {
+                "type": "json_schema",
+                "name": "recipe_import",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string"},
+                        "ingredients": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        },
+                        "steps": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        }
+                    },
+                    "required": ["title", "ingredients", "steps"],
+                    "additionalProperties": False
+                }
+            }
+        }
     )
     return {"result": response.output_text}
