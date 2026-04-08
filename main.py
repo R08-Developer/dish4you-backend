@@ -18,7 +18,22 @@ def root():
 def import_recipe(data: ImportRequest):
     response = client.responses.create(
         model="gpt-4.1-mini",
-        input=f"Zet deze recepttekst om naar een gestructureerd recept.\n\n{data.text}",
+        input=f"""
+Analyseer deze tekst.
+
+1. Bepaal of dit een maaltijdrecept is.
+2. Extraheer titel, ingrediënten en stappen.
+3. Geef aan wat ontbreekt.
+4. Geef waarschuwingen indien nodig.
+
+BELANGRIJK:
+- Verzín geen ontbrekende informatie
+- Als iets ontbreekt → leeg laten
+- Titel mag je voorzichtig afleiden indien duidelijk
+
+Tekst:
+{data.text}
+""",
         text={
             "format": {
                 "type": "json_schema",
@@ -27,6 +42,8 @@ def import_recipe(data: ImportRequest):
                 "schema": {
                     "type": "object",
                     "properties": {
+                        "isRecipe": {"type": "boolean"},
+                        "confidence": {"type": "number"},
                         "title": {"type": "string"},
                         "ingredients": {
                             "type": "array",
@@ -35,12 +52,29 @@ def import_recipe(data: ImportRequest):
                         "steps": {
                             "type": "array",
                             "items": {"type": "string"}
+                        },
+                        "missingFields": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        },
+                        "warnings": {
+                            "type": "array",
+                            "items": {"type": "string"}
                         }
                     },
-                    "required": ["title", "ingredients", "steps"],
+                    "required": [
+                        "isRecipe",
+                        "confidence",
+                        "title",
+                        "ingredients",
+                        "steps",
+                        "missingFields",
+                        "warnings"
+                    ],
                     "additionalProperties": False
                 }
             }
         }
     )
+
     return {"result": response.output_text}
