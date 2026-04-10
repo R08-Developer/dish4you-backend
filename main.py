@@ -24,13 +24,16 @@ Analyseer deze tekst.
 1. Bepaal of dit een maaltijdrecept is.
 2. De invoer kan Nederlands, Duits of Engels zijn.
 3. Extraheer titel, porties, ingrediënten en stappen.
-4. Vertaal ALLE output naar het Nederlands.
-5. Haal hoeveelheden, eenheden, bereidingstijd en wachttijd eruit als die expliciet of heel duidelijk in de tekst staan.
-6. Geef aan wat ontbreekt.
-7. Geef waarschuwingen indien nodig.
+4. Geef ALLE output volledig in het Nederlands terug.
+5. Vertaal ook losse ingrediënten, kooktermen en stapbeschrijvingen volledig naar het Nederlands.
+6. Haal hoeveelheden, eenheden, bereidingstijd en wachttijd eruit als die expliciet of heel duidelijk in de tekst staan.
+7. Geef aan wat ontbreekt.
+8. Geef waarschuwingen indien nodig.
 
 BELANGRIJK:
 - Ondersteun alleen Nederlands, Duits en Engels. Als de tekst een andere taal is, geef dit aan in warnings.
+- ALLE tekstvelden in de output moeten volledig Nederlands zijn.
+- Laat geen Duitse of Engelse woorden staan in title, ingredients, steps, missingFields of warnings, behalve bij originele eenheden die niet goed vertaald kunnen worden.
 - Verzín geen ontbrekende informatie.
 - Als iets ontbreekt: laat leeg of gebruik null.
 - Gebruik alleen tijden die echt in de tekst staan of duidelijk direct uit de tekst volgen.
@@ -38,9 +41,7 @@ BELANGRIJK:
 - waitMinutes = wachttijd / oven / rijzen / rusten / marineren enz.
 - title mag je voorzichtig afleiden indien duidelijk.
 - servings mag alleen ingevuld worden als het expliciet genoemd wordt.
-- Ingrediënten, stappen en titel moeten altijd in het Nederlands teruggegeven worden.
 - Engelse of buitenlandse eenheden mogen behouden blijven, maar geef een waarschuwing als ze mogelijk onduidelijk zijn (bijvoorbeeld 'cup', 'ounce').
-
 Tekst:
 {data.text}""",
         text={
