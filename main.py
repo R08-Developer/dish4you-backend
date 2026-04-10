@@ -1,3 +1,19 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+import os
+from openai import OpenAI
+
+app = FastAPI()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+class ImportRequest(BaseModel):
+    text: str
+
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "Dish4You backend draait"}
+
 @app.post("/import-recipe")
 def import_recipe(data: ImportRequest):
     response = client.responses.create(
@@ -34,7 +50,59 @@ Tekst:
                         "isRecipe": {"type": "boolean"},
                         "confidence": {"type": "number"},
                         "title": {"type": "string"},
-                        "servings": {
+                        "servings": {"type": ["integer", "null"]},
+                        "ingredients": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"},
+                                    "amount": {"type": ["number", "null"]},
+                                    "unit": {"type": ["string", "null"]}
+                                },
+                                "required": ["name", "amount", "unit"],
+                                "additionalProperties": False
+                            }
+                        },
+                        "steps": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "text": {"type": "string"},
+                                    "actionMinutes": {"type": ["integer", "null"]},
+                                    "waitMinutes": {"type": ["integer", "null"]}
+                                },
+                                "required": ["text", "actionMinutes", "waitMinutes"],
+                                "additionalProperties": False
+                            }
+                        },
+                        "missingFields": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        },
+                        "warnings": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        }
+                    },
+                    "required": [
+                        "isRecipe",
+                        "confidence",
+                        "title",
+                        "servings",
+                        "ingredients",
+                        "steps",
+                        "missingFields",
+                        "warnings"
+                    ],
+                    "additionalProperties": False
+                }
+            }
+        }
+    )
+
+    return {"result": response.output_text}                        "servings": {
                             "type": ["integer", "null"]
                         },
                         "ingredients": {
