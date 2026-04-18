@@ -109,45 +109,96 @@ Tekst:
 
     return {"result": response.output_text}
 
-class PantryRequest(BaseModel):
-    ingredients: list[str]
-
 @app.post("/generate-from-pantry")
 def generate_from_pantry(request: PantryRequest):
     ingredients_text = ", ".join(request.ingredients)
 
-    prompt = f"""
+    response = client.responses.create(
+        model="gpt-4.1-mini",
+        input=f"""
 Je bent een slimme kookassistent.
 
 De gebruiker heeft de volgende ingrediënten in huis:
 {ingredients_text}
 
-Maak een realistisch, lekker en eenvoudig recept.
+Maak een realistisch, lekker en eenvoudig maaltijdrecept.
 
 Regels:
-- Gebruik zoveel mogelijk van deze ingrediënten
-- Je mag basisproducten toevoegen (olie, zout, peper, water)
-- Het recept moet logisch kloppen
-- Geef een titel
-- Geef ingrediëntenlijst (met hoeveelheden)
-- Geef duidelijke bereidingsstappen
+- Gebruik zoveel mogelijk van deze ingrediënten.
+- Je mag basisproducten toevoegen als dat logisch is, zoals olie, zout, peper en water.
+- Verzín geen vreemde of luxe extra ingrediënten die niet nodig zijn.
+- Geef ALLE output volledig in het Nederlands terug.
+- Geef een titel.
+- Geef ingrediënten met naam, hoeveelheid en eenheid als dat logisch is.
+- Geef duidelijke bereidingsstappen.
+- Als tijdinformatie niet duidelijk is, gebruik null.
+- servings alleen invullen als je een redelijke schatting kunt maken.
+- missingFields leeg laten als het recept bruikbaar is.
+- warnings alleen invullen als iets onduidelijk of onzeker is.
 
-Geef output in JSON in dit formaat:
-
-{{
-  "title": "...",
-  "ingredients": ["..."],
-  "steps": ["..."]
-}}
-"""
-
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[
-            {"role": "system", "content": "Je helpt met koken."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.7
+Geef output in exact dit JSON-formaat.
+""",
+        text={
+            "format": {
+                "type": "json_schema",
+                "name": "pantry_recipe_generation",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "isRecipe": {"type": "boolean"},
+                        "confidence": {"type": "number"},
+                        "title": {"type": "string"},
+                        "servings": {"type": ["integer", "null"]},
+                        "ingredients": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"},
+                                    "amount": {"type": ["number", "null"]},
+                                    "unit": {"type": ["string", "null"]}
+                                },
+                                "required": ["name", "amount", "unit"],
+                                "additionalProperties": False
+                            }
+                        },
+                        "steps": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "text": {"type": "string"},
+                                    "actionMinutes": {"type": ["integer", "null"]},
+                                    "waitMinutes": {"type": ["integer", "null"]}
+                                },
+                                "required": ["text", "actionMinutes", "waitMinutes"],
+                                "additionalProperties": False
+                            }
+                        },
+                        "missingFields": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        },
+                        "warnings": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        }
+                    },
+                    "required": [
+                        "isRecipe",
+                        "confidence",
+                        "title",
+                        "servings",
+                        "ingredients",
+                        "steps",
+                        "missingFields",
+                        "warnings"
+                    ],
+                    "additionalProperties": False
+                }
+            }
+        }
     )
 
-    return {"result": response.choices[0].message.content}
+    return {"result": response.output_text}
