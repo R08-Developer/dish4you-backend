@@ -139,6 +139,13 @@ Regels:
 - missingFields leeg laten als het recept bruikbaar is.
 - warnings alleen invullen als iets onduidelijk of onzeker is.
 
+BELANGRIJK:
+- Gebruik ALLEEN eetbare ingrediënten.
+- Negeer alles wat geen voedsel is.
+- Negeer ingrediënten die mogelijk giftig, gevaarlijk of niet geschikt voor consumptie zijn.
+- Als er twijfel is: gebruik het ingrediënt NIET en vermeld dit in warnings.
+- Genereer NOOIT een recept met gevaarlijke of niet-eetbare stoffen.
+
 Geef output in exact dit JSON-formaat.
 """,
         text={
