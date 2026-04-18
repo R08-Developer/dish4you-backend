@@ -108,3 +108,46 @@ Tekst:
     )
 
     return {"result": response.output_text}
+
+class PantryRequest(BaseModel):
+    ingredients: list[str]
+
+@app.post("/generate-from-pantry")
+def generate_from_pantry(request: PantryRequest):
+    ingredients_text = ", ".join(request.ingredients)
+
+    prompt = f"""
+Je bent een slimme kookassistent.
+
+De gebruiker heeft de volgende ingrediënten in huis:
+{ingredients_text}
+
+Maak een realistisch, lekker en eenvoudig recept.
+
+Regels:
+- Gebruik zoveel mogelijk van deze ingrediënten
+- Je mag basisproducten toevoegen (olie, zout, peper, water)
+- Het recept moet logisch kloppen
+- Geef een titel
+- Geef ingrediëntenlijst (met hoeveelheden)
+- Geef duidelijke bereidingsstappen
+
+Geef output in JSON in dit formaat:
+
+{{
+  "title": "...",
+  "ingredients": ["..."],
+  "steps": ["..."]
+}}
+"""
+
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {"role": "system", "content": "Je helpt met koken."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7
+    )
+
+    return {"result": response.choices[0].message.content}
