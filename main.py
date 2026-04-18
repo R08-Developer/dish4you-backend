@@ -10,6 +10,9 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 class ImportRequest(BaseModel):
     text: str
 
+class PantryRequest(BaseModel):
+    ingredients: list[str]
+    
 @app.get("/")
 def root():
     return {"status": "ok", "message": "Dish4You backend draait"}
